@@ -19,13 +19,14 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="#1b4fa8">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/activity_main_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/colorPrimaryDark"
+                android:background="#1b4fa8"
                 tools:ignore="UnusedAttribute"
                 android:elevation="4dp"
                 android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
@@ -33,7 +34,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="SPLIT IT EASY"
+                    android:text="SPLIT"
                     android:layout_gravity="center"
                     android:textSize="25sp"
                     android:textStyle="bold"
@@ -136,7 +137,7 @@
                         <ImageView
                             android:layout_width="64dp"
                             android:layout_height="64dp"
-                            android:background="@drawable/ic_addbill_icon"
+                            android:background="@drawable/new_grp"
                             android:contentDescription="Create new group"
                             android:padding="10dp"/>
                         <TextView

@@ -6,12 +6,15 @@
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
     android:elevation="3dp"
+    android:background="#ffffff "
     android:padding="15dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:background="@drawable/round_cornor"
         android:padding="10sp">
 
         <androidx.cardview.widget.CardView
@@ -20,7 +23,7 @@
             android:layout_height="50dp"
 
             app:cardBackgroundColor="@color/cardview_shadow_end_color"
-            app:cardCornerRadius="25dp"
+            app:cardCornerRadius="50dp"
 
 
             >
@@ -30,6 +33,7 @@
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_margin="12.5dp"
+                android:textColor="#000000"
                 android:src="@drawable/ic_baseline_account_balance_24" />
 
         </androidx.cardview.widget.CardView>
@@ -45,12 +49,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
+                android:textColor="#000000"
                 android:textSize="10dp" />
 
             <TextView
                 android:id="@+id/acc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="#000000"
                 android:layout_marginLeft="10dp"
                 android:textSize="10dp" />
         </LinearLayout>

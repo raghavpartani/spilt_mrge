@@ -125,8 +125,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
         changenotificationcolor();
-
-
     }
 
     private void changenotificationcolor() {
@@ -255,10 +253,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             Toast.makeText(this, "No message to show!", Toast.LENGTH_SHORT).show();
         }
+//        totalcredtv.setText(totalcred + "Total cred");
+//        totaldebtv.setText(totaldeb + "total deb");
 
+        totalcredtv.setText(totalcred + "");
+        totaldebtv.setText(totaldeb + "");
 
-        totalcredtv.setText(totalcred + "Total cred");
-        totaldebtv.setText(totaldeb + "total deb");
         return s;
     }
 
@@ -363,6 +363,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         if (item.getItemId() == R.id.chart) {
             Toast.makeText(this, "stats", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this,stats.class));
 
         }
         if (item.getItemId() == R.id.privacy) {

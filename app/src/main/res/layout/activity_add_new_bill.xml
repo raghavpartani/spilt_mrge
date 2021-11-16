@@ -8,7 +8,9 @@
     tools:context=".AddEditBillActivity">
 
     <include layout="@layout/toolbar"
-        android:id="@+id/addBillToolbar"/>
+        android:id="@+id/addBillToolbar"
+        android:background="#1b4fa8"
+        />
 
     <EditText
         android:id="@+id/addBillItemName"
