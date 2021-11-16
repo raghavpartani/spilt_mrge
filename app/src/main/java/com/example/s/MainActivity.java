@@ -331,7 +331,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private String getamts(String bodylowercase, String creordeb) {
         String amt[] = {};
         amtsfordisplay = "";
-        if (bodylowercase.contains("inr")) {
+        if (bodylowercase.contains(" inr")) {
             amt = bodylowercase.split("inr", 2);
         } else if (bodylowercase.contains("rs")) {
             amt = bodylowercase.split("rs", 2);
