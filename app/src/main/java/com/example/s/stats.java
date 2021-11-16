@@ -9,6 +9,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.Telephony;
 import android.text.format.DateFormat;
@@ -19,6 +20,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.common.math.Stats;
 
 import java.text.SimpleDateFormat;
@@ -37,26 +43,80 @@ public class stats extends AppCompatActivity {
     static String amts = "";
     String avail = "";
     static String amtsfordisplay = "";
+    static double jantotalb = 0.0;
+    static double febtotalb = 0.0;
+    static double martotalb = 0.0;
+    static double aprtotalb = 0.0;
+    static double maytotalb = 0.0;
+    static double juntotalb = 0.0;
+    static double jultotalb = 0.0;
+    static double augtotalb = 0.0;
+    static double septotalb = 0.0;
+    static double octtotalb = 0.0;
+    static double novtotalb = 0.0;
+    static double dectotalb = 0.0;
+
+    // variable for our bar chart
+    BarChart barChart;
+
+    // variable for our bar data.
+    BarData barData;
+
+    // variable for our bar data set.
+    BarDataSet barDataSet;
+
+    // array list for storing entries.
+    ArrayList barEntriesArrayList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stats);
         tv = findViewById(R.id.textView);
-
         yearspinner = findViewById(R.id.year);
-
         setspinner();
 
-        //   tv.setText();
-        //    TextV
-//        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_SMS}, 1);
-//        } else {
-//            String SelectedDate[] = month.getSelectedItem().toString().split(" ", 2);
-//            msgData = getAllSms(this, SelectedDate[0], SelectedDate[1]);
-//        }
+
+        // initializing variable for bar chart.
+        barChart = findViewById(R.id.idBarChart);
+
+
+        if (ContextCompat.checkSelfPermission(stats.this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(stats.this, new String[]{Manifest.permission.READ_SMS}, 1);
+        } else {
+            msgData = getAllSms(stats.this, yearspinner.getSelectedItem().toString());
+        }
+        setBar();
+
     }
+
+    private void setBar() {
+        // calling method to get bar entries.
+        getBarEntries();
+
+        // creating a new bar data set.
+        barDataSet = new BarDataSet(barEntriesArrayList, "");
+
+        // creating a new bar data and
+        // passing our bar data set.
+        barData = new BarData(barDataSet);
+
+
+        // below line is to set data
+        // to our bar chart.
+        barChart.setData(barData);
+
+        // adding color to our bar data set.
+        barDataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+
+        // setting text color.
+        barDataSet.setValueTextColor(Color.BLACK);
+
+        // setting text size
+        barDataSet.setValueTextSize(16f);
+        barChart.getDescription().setEnabled(false);
+    }
+
 
     private void setspinner() {
         ArrayList<String> yeararraylist = new ArrayList<>();
@@ -76,6 +136,7 @@ public class stats extends AppCompatActivity {
                     ActivityCompat.requestPermissions(stats.this, new String[]{Manifest.permission.READ_SMS}, 1);
                 } else {
                     msgData = getAllSms(stats.this, yearspinner.getSelectedItem().toString());
+                    setBar();
                 }
             }
 
@@ -100,6 +161,18 @@ public class stats extends AppCompatActivity {
         double novtotal = 0.0;
         double dectotal = 0.0;
 
+        jantotalb = 0.0;
+        febtotalb = 0.0;
+        martotalb = 0.0;
+        aprtotalb = 0.0;
+        maytotalb = 0.0;
+        juntotalb = 0.0;
+        jultotalb = 0.0;
+        augtotalb = 0.0;
+        septotalb = 0.0;
+        octtotalb = 0.0;
+        novtotalb = 0.0;
+        dectotalb = 0.0;
         ContentResolver cr = context.getContentResolver();
         Cursor c = cr.query(Telephony.Sms.CONTENT_URI, null, null, null, null);
         int totalSMS = 0;
@@ -145,33 +218,40 @@ public class stats extends AppCompatActivity {
 
                                                 if (splitedate[1].trim().equalsIgnoreCase("jan")) {
                                                     jantotal = jantotal + Double.parseDouble(amts);
+                                                    jantotalb = jantotal;
                                                 } else if (splitedate[1].trim().equalsIgnoreCase("feb")) {
                                                     febtotal = febtotal + Double.parseDouble(amts);
+                                                    febtotalb = febtotal;
                                                 } else if (splitedate[1].trim().equalsIgnoreCase("mar")) {
                                                     martotal = martotal + Double.parseDouble(amts);
+                                                    martotalb = martotal;
                                                 } else if (splitedate[1].trim().equalsIgnoreCase("apr")) {
                                                     aprtotal = aprtotal + Double.parseDouble(amts);
+                                                    aprtotalb = aprtotal;
                                                 } else if (splitedate[1].trim().equalsIgnoreCase("may")) {
                                                     maytotal = maytotal + Double.parseDouble(amts);
+                                                    maytotalb = maytotal;
                                                 } else if (splitedate[1].trim().equalsIgnoreCase("jun")) {
                                                     juntotal = juntotal + Double.parseDouble(amts);
+                                                    juntotalb = juntotal;
                                                 } else if (splitedate[1].trim().equalsIgnoreCase("jul")) {
                                                     jultotal = jultotal + Double.parseDouble(amts);
+                                                    jultotalb = jultotal;
                                                 } else if (splitedate[1].trim().equalsIgnoreCase("aug")) {
                                                     augtotal = augtotal + Double.parseDouble(amts);
-
+                                                    augtotalb = augtotal;
                                                 } else if (splitedate[1].trim().equalsIgnoreCase("sep")) {
                                                     septotal = septotal + Double.parseDouble(amts);
-
+                                                    septotalb = septotal;
                                                 } else if (splitedate[1].trim().equalsIgnoreCase("oct")) {
                                                     octtotal = octtotal + Double.parseDouble(amts);
-
+                                                    octtotalb = octtotal;
                                                 } else if (splitedate[1].trim().equalsIgnoreCase("nov")) {
                                                     novtotal = novtotal + Double.parseDouble(amts);
-
+                                                    novtotalb = novtotal;
                                                 } else if (splitedate[1].trim().equalsIgnoreCase("dec")) {
                                                     dectotal = dectotal + Double.parseDouble(amts);
-
+                                                    dectotalb = dectotal;
                                                 }
                                                 //    totaldeb = totaldeb + Double.parseDouble(amts);
                                             }
@@ -192,10 +272,12 @@ public class stats extends AppCompatActivity {
                     c.moveToNext();
 
                 }
-                tv.setText(jantotal + "\n" + febtotal + "\n" + martotal + "\n" + aprtotal + "\n" + maytotal + "\n" + juntotal + "\n" + jultotal + "\n" + augtotal + "\n" + septotal + "\n" + octtotal + "\n" + novtotal + "\n" + dectotal);
+                //tv.setText(jantotal + "\n" + febtotal + "\n" + martotal + "\n" + aprtotal + "\n" + maytotal + "\n" + juntotal + "\n" + jultotal + "\n" + augtotal + "\n" + septotal + "\n" + octtotal + "\n" + novtotal + "\n" + dectotal);
 
             }
             c.close();
+            // tv.setText(jantotal+"\n"+febtotal+"\n"+martotal+"\n"+aprtotal+"\n"+maytotal+"\n"+juntotal+"\n"+jultotal+"\n"+augtotal+"\n"+septotal+"\n"+octtotal+"\n"+novtotal+"\n"+dectotal);
+
 
         } else {
             Toast.makeText(this, "No message to show!", Toast.LENGTH_SHORT).show();
@@ -205,7 +287,7 @@ public class stats extends AppCompatActivity {
 
     private String getamts(String bodylowercase, String creordeb) {
         String amt[] = {};
-        amts="";
+        amts = "";
         amtsfordisplay = "";
         if (bodylowercase.contains(" inr")) {
             amt = bodylowercase.split("inr", 2);
@@ -226,5 +308,25 @@ public class stats extends AppCompatActivity {
         }
         //amts = "\n" + creordeb + " amount" + amts;
         return amts;
+    }
+
+    private void getBarEntries() {
+        // creating a new array list
+        barEntriesArrayList = new ArrayList<>();
+
+        // adding new entry to our array list with bar
+        // entry and passing x and y axis value to it.
+        barEntriesArrayList.add(new BarEntry(1f, (float) jantotalb));
+        barEntriesArrayList.add(new BarEntry(2f, (float) febtotalb));
+        barEntriesArrayList.add(new BarEntry(3f, (float) martotalb));
+        barEntriesArrayList.add(new BarEntry(4f, (float) aprtotalb));
+        barEntriesArrayList.add(new BarEntry(5f, (float) maytotalb));
+        barEntriesArrayList.add(new BarEntry(6f, (float) juntotalb));
+        barEntriesArrayList.add(new BarEntry(7f, (float) jultotalb));
+        barEntriesArrayList.add(new BarEntry(8f, (float) augtotalb));
+        barEntriesArrayList.add(new BarEntry(9f, (float) septotalb));
+        barEntriesArrayList.add(new BarEntry(10f, (float) octtotalb));
+        barEntriesArrayList.add(new BarEntry(11f, (float) novtotalb));
+        barEntriesArrayList.add(new BarEntry(12f, (float) dectotalb));
     }
 }

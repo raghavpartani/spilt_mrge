@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String monthname = parent.getItemAtPosition(position).toString();
-                Toast.makeText(parent.getContext(), "Selected: " + monthname, Toast.LENGTH_LONG).show();
+              //  Toast.makeText(parent.getContext(), "Selected: " + monthname, Toast.LENGTH_LONG).show();
                 String SelectedDate[] = month.getSelectedItem().toString().split(" ", 2);
                 if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_SMS}, 1);
@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 amtsfordisplay = "";
 
                                 if (m.find()) {
-                                    Toast.makeText(context, "" + m.group(), Toast.LENGTH_SHORT).show();
+                                 //   Toast.makeText(context, "" + m.group(), Toast.LENGTH_SHORT).show();
                                     if (splitedate[1].trim().equals(month) && splitedate[2].trim().equals(year)) {
                                         String accno = getaccountno(bodylowercase);
                                         if (bodylowercase.contains("debited") || bodylowercase.contains("paid") || bodylowercase.contains("spent")) {
