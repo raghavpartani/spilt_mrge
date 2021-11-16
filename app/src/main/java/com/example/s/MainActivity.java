@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Telephony;
 import android.text.format.DateFormat;
@@ -368,9 +369,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         if (item.getItemId() == R.id.privacy) {
             Toast.makeText(this, "privacy", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this,Privacy_Policy.class));
         }
         if (item.getItemId() == R.id.connect_us) {
             Toast.makeText(this, "connect us", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(Intent.ACTION_SENDTO)
+                    .setData(new Uri.Builder().scheme("mailto").build())
+                    .putExtra(Intent.EXTRA_EMAIL, new String[]{ "ritvikdubeyrk@gmail.com" });
+            startActivity(intent);
+
         }
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
