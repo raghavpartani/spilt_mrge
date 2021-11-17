@@ -31,6 +31,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 
 import java.text.SimpleDateFormat;
@@ -91,7 +92,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             String SelectedDate[] = month.getSelectedItem().toString().split(" ", 2);
             msgData = getAllSms(this, SelectedDate[0], SelectedDate[1]);
         }
+        setbottomnav();
 
+    }
+
+    private void setbottomnav() {
+        BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.bank:
+                        break;
+                    case R.id.cash:
+                        startActivity(new Intent(MainActivity.this,ManualExoenses_Activity.class));
+                        break;
+                    case R.id.bill:
+                        startActivity(new Intent(MainActivity.this,Bill_Activity.class));
+                        break;
+
+                    default:
+                        break;
+                }
+                return true;
+            }
+        });
     }
 
     private void setmonthspinner() {

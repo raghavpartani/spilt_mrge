@@ -11,6 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".Bill_Activity"></activity>
+        <activity android:name=".ManualExoenses_Activity" />
         <activity android:name=".passcode">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,9 +42,7 @@
         <activity android:name=".CreateNewGroupActivity" />
         <activity
             android:name=".MainActivity"
-            android:theme="@style/Theme.Design.NoActionBar">
-
-        </activity>
+            android:theme="@style/Theme.Design.NoActionBar" />
     </application>
 
 </manifest>
