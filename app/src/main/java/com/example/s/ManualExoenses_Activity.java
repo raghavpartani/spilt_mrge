@@ -8,6 +8,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
@@ -19,6 +20,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Message;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -44,9 +46,10 @@ import java.util.GregorianCalendar;
 
 public class ManualExoenses_Activity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     RecyclerView rcv;
-    ArrayList<MessageModelClass> Message;
+    ArrayList<CourseModal> a;
+    ArrayList<String> Message1;
     RecyclerView.Adapter Messageadapter;
-    RecyclerView.LayoutManager mgr;
+    RecyclerView.LayoutManager layoutManager;
 
     Toolbar toolbar;
     DrawerLayout drawerLayout;
@@ -56,12 +59,15 @@ public class ManualExoenses_Activity extends AppCompatActivity implements Naviga
     Spinner month;
     ImageView add;
 
-
+    DBHandler database;
     ArrayList<String> lst1 = new ArrayList<>();
     static String amts = "";
     String avail = "";
     static String amtsfordisplay = "";
     TextView totaldebtv, totalcredtv;
+
+    private ArrayList<CourseModal> courseModalArrayList;
+    private DBHandler dbHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +76,18 @@ public class ManualExoenses_Activity extends AppCompatActivity implements Naviga
         rcv = findViewById(R.id.rcv);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        Message1=new ArrayList<>();
+        dbHandler = new DBHandler(ManualExoenses_Activity.this);
+        a= dbHandler.read();
+        for(int i=0;i<a.size();i++)
+              Message1.add(a.get(i).getTitle()+a.get(i).getAmout()+a.get(i).getTransactionType()+a.get(i).getCategory()+a.get(i).getDay()+a.get(i).getMonth());
+
+        Messageadapter = new manual_expense_adapter(ManualExoenses_Activity.this,Message1);
+        rcv.setAdapter(Messageadapter);
+        database=new DBHandler(ManualExoenses_Activity.this);
+        layoutManager=new LinearLayoutManager(ManualExoenses_Activity.this);
+        rcv.setLayoutManager(layoutManager);
 
 
         add = findViewById(R.id.add);
@@ -96,7 +114,7 @@ public class ManualExoenses_Activity extends AppCompatActivity implements Naviga
                 d.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 d.show();
                 EditText title = d.findViewById(R.id.et_title);
-                EditText Amount = d.findViewById(R.id.et_amount);
+                EditText amount = d.findViewById(R.id.et_amount);
                 Spinner category = d.findViewById(R.id.et_tag);
                 EditText date = d.findViewById(R.id.et_when);
                 Spinner transtype = d.findViewById(R.id.et_transactionType);
@@ -104,6 +122,7 @@ public class ManualExoenses_Activity extends AppCompatActivity implements Naviga
                 ImageView cal = d.findViewById(R.id.cal);
                 final Calendar c = Calendar.getInstance();
                 date.setEnabled(false);
+
 
                 ArrayList<String> transtypearraylist = new ArrayList<>();
                 transtypearraylist.add("Select Transaction Type");
@@ -141,10 +160,51 @@ public class ManualExoenses_Activity extends AppCompatActivity implements Naviga
 
                     }
                 });
+                save.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(title.getText().toString().equals("")){
+                            title.setError("Missing Field");
+                        }else if(amount.getText().toString().equals("")){
+                            amount.setError("Missing Field");
+                        }else if(date.getText().toString().equals("")){
+                            date.setError("Missing Field");
+                        }else if(transtype.getSelectedItem().toString().equals("Select Transaction Type")){
+                            Toast.makeText(ManualExoenses_Activity.this, "Missing Transaction Type", Toast.LENGTH_SHORT).show();
+                        }else if(category.getSelectedItem().toString().equals("Select a category")){
+                            Toast.makeText(ManualExoenses_Activity.this, "Missing Category", Toast.LENGTH_SHORT).show();
+                        }else{
+                            String splitdate[]=date.getText().toString().trim().split("/",3);
+                            String transtype1=transtype.getSelectedItem().toString();
+                            String category1=category.getSelectedItem().toString();
+                            String title1=title.getText().toString();
+                            String amount1=amount.getText().toString();
+
+                            CourseModal courseModal=new CourseModal(title1,amount1,splitdate[0],splitdate[1],splitdate[2],transtype1,category1);
+                            dbHandler.insert(ManualExoenses_Activity.this,courseModal);
+                            //Toast.makeText(ManualExoenses_Activity.this, ""+title1+amount1+splitdate[0]+splitdate[1]+splitdate[2]+category1+transtype1, Toast.LENGTH_SHORT).show();
+                            getdetails();
+                            d.dismiss();
+
+                        }
+                    }
+                });
 
 
             }
+
         });
+
+
+
+    }
+
+    private void getdetails() {
+        Message1=new ArrayList<>();
+        a= dbHandler.read();
+        for(int i=0;i<a.size();i++)
+            Message1.add(a.get(i).getTitle()+a.get(i).getAmout()+a.get(i).getTransactionType()+a.get(i).getCategory()+a.get(i).getDay()+a.get(i).getMonth());
+        Messageadapter.notifyDataSetChanged();
     }
 
     private void setbottomnav() {
