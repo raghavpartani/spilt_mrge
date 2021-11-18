@@ -216,26 +216,37 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                             amts = getamts(bodylowercase, "debited");
                                             type = "debit";
                                             avail = getavail(bodylowercase);
+                                            amts=amts.trim();
                                             if (amts.length() > 0) {
                                                 if (amts.charAt(0) == '.') {
                                                     String am[] = amts.split(".", 2);
                                                     amts = am[1];
                                                 }
+
+                                                try {
+                                                    totaldeb = totaldeb + Double.parseDouble(amts);
+                                                } catch (Exception e) {
+
+                                                }
                                             }
-                                            totaldeb = totaldeb + Double.parseDouble(amts);
                                         }
                                         //abhi credited ka
                                         else if (bodylowercase.contains("credited") || bodylowercase.contains("received")) {
                                             amts = getamts(bodylowercase, "credited");
                                             type = "credit";
                                             avail = getavail(bodylowercase);
+                                            amts=amts.trim();
                                             if (amts.length() > 0) {
                                                 if (amts.charAt(0) == '.') {
                                                     String am[] = amts.split(".", 2);
                                                     amts = am[1];
                                                 }
+                                                try {
+                                                    totalcred = totalcred + Double.parseDouble(amts);
+                                                } catch (Exception e) {
+
+                                                }
                                             }
-                                            totalcred = totalcred + Double.parseDouble(amts);
                                         }
                                         String trans_type = "bank";
                                         if (bodylowercase.contains("upi")) {
@@ -383,26 +394,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (item.getItemId() == R.id.logout) {
             Toast.makeText(this, "logout", Toast.LENGTH_SHORT).show();
         }
-        if (item.getItemId() == R.id.trip) {
+        else if (item.getItemId() == R.id.trip) {
             Toast.makeText(this, "trip", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this,SplitScreen.class));
         }
-        if (item.getItemId() == R.id.chart) {
+        else if (item.getItemId() == R.id.chart) {
             Toast.makeText(this, "stats", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this,stats.class));
 
         }
-        if (item.getItemId() == R.id.privacy) {
+        else if (item.getItemId() == R.id.privacy) {
             Toast.makeText(this, "privacy", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this,Privacy_Policy.class));
         }
-        if (item.getItemId() == R.id.connect_us) {
+        else if (item.getItemId() == R.id.connect_us) {
             Toast.makeText(this, "connect us", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Intent.ACTION_SENDTO)
                     .setData(new Uri.Builder().scheme("mailto").build())
                     .putExtra(Intent.EXTRA_EMAIL, new String[]{ "ritvikdubeyrk@gmail.com" });
             startActivity(intent);
 
+        }
+        else if(item.getItemId()==R.id.prediction){
+            Toast.makeText(this, "Predictions", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this,FutureActivity.class));
         }
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;

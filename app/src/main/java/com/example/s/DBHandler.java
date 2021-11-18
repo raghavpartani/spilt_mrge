@@ -9,10 +9,6 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-import static android.provider.Contacts.SettingsColumns.KEY;
-import static java.sql.Types.INTEGER;
-import static java.text.Collator.PRIMARY;
-
 public class DBHandler extends SQLiteOpenHelper {
     private static final String ID_COL = "id";
 
@@ -24,13 +20,16 @@ public class DBHandler extends SQLiteOpenHelper {
     // below method is for creating a database by running a sqlite query
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table manual(" + ID_COL + " INTEGER PRIMARY KEY AUTOINCREMENT,title text,amount text,day text,month text,year text,category text,transaction_type text)");
+        db.execSQL("create table manual(" + ID_COL + " INTEGER PRIMARY KEY AUTOINCREMENT,title text,amount text,day text,month text,year text,category text,transaction_type text,date date)");
     }
 
     // this method is use to add new course to our sqlite database.
-    public void insert(Context con, CourseModal courseModal) {
+    public int insert(Context con, CourseModal courseModal) {
         SQLiteDatabase db = this.getWritableDatabase();
 
+        if(courseModal.getDay().trim().length()==1){
+           courseModal.setDay("0"+courseModal.getDay());
+        }
         ContentValues values = new ContentValues();
         values.put("title", courseModal.getTitle());
         values.put("amount", courseModal.getAmout());
@@ -39,28 +38,38 @@ public class DBHandler extends SQLiteOpenHelper {
         values.put("year", courseModal.getYear());
         values.put("category", courseModal.getCategory());
         values.put("transaction_type", courseModal.getTransactionType());
+        values.put("date",courseModal.getYear()+"/"+courseModal.getMonth()+"/"+courseModal.getDay());
         // after adding all values we are passing
         // content values to our table.
 
         long x = db.insert("manual", null, values);
-        if (x > 0)
+        if (x > 0) {
             Toast.makeText(con, "Sucessfully Inserted" + courseModal.getTransactionType(), Toast.LENGTH_SHORT).show();
+            String sql="SELECT * FROM manual ORDER BY id DESC LIMIT 1";
+            Cursor cur =db.rawQuery(sql,null);
+            cur.moveToNext();
+            return cur.getInt(cur.getColumnIndex("id"));
+        }
         else
             Toast.makeText(con, "Failed to insert", Toast.LENGTH_SHORT).show();
         // at last we are closing our
         // database after adding database.
         db.close();
+        return 0;
+
+
     }
 
     // we have created a new method for reading all the courses.
-    public ArrayList<CourseModal> read() {
+    public ArrayList<CourseModal> read(String month,String year) {
         SQLiteDatabase db = this.getReadableDatabase();
         ArrayList<CourseModal> lst = new ArrayList<>();
-        Cursor cur =db.rawQuery("select * from manual",null);
+        String sql="select * from manual where month=? and year=? order by day";
+        Cursor cur =db.rawQuery(sql,new String[]{month,year});
         while (cur.moveToNext()) {
             CourseModal ref = new CourseModal();
             //title text,amount text,day text,month text,year text,category text,transaction_type text
-
+            ref.setId(cur.getInt(cur.getColumnIndex("id")));
             ref.setTitle(cur.getString(cur.getColumnIndex("title")));
             ref.setAmout(cur.getString(cur.getColumnIndex("amount")));
             ref.setDay(cur.getString(cur.getColumnIndex("day")));
@@ -112,6 +121,37 @@ public class DBHandler extends SQLiteOpenHelper {
         // this method is called to check if the table exists already.
         db.execSQL("DROP TABLE IF EXISTS " + "manual");
         onCreate(db);
+    }
+
+    public double gettotalofmonth(String month, String year) {
+        double amt=0;
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<CourseModal> lst = new ArrayList<>();
+        String sql="select * from manual where month=? and year=? order by day";
+        Cursor cur =db.rawQuery(sql,new String[]{month,year});
+        while (cur.moveToNext()) {
+            CourseModal ref = new CourseModal();
+            //title text,amount text,day text,month text,year text,category text,transaction_type text
+            ref.setAmout(cur.getString(cur.getColumnIndex("amount")));
+            ref.setTransactionType(cur.getString(cur.getColumnIndex("transaction_type")));
+            if(cur.getString(cur.getColumnIndex("transaction_type")).equals("Expense")){
+                amt=amt+Double.parseDouble(cur.getString(cur.getColumnIndex("amount")));
+            }
+            lst.add(ref);
+        }
+        return amt;
+    }
+
+    public boolean delete(String id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        int x = db.delete("manual","id = ?",new String[]{id+""});
+
+        if(x > 0)
+            return true;
+        else
+            return false;
+
     }
 }
 

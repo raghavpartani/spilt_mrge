@@ -1,5 +1,6 @@
 package com.example.s;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -13,6 +14,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.Telephony;
 import android.text.format.DateFormat;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,9 +23,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.common.math.Stats;
 
@@ -43,18 +50,19 @@ public class stats extends AppCompatActivity {
     static String amts = "";
     String avail = "";
     static String amtsfordisplay = "";
-    static double jantotalb = 0.0;
-    static double febtotalb = 0.0;
-    static double martotalb = 0.0;
-    static double aprtotalb = 0.0;
-    static double maytotalb = 0.0;
-    static double juntotalb = 0.0;
-    static double jultotalb = 0.0;
-    static double augtotalb = 0.0;
-    static double septotalb = 0.0;
-    static double octtotalb = 0.0;
-    static double novtotalb = 0.0;
-    static double dectotalb = 0.0;
+    double jantotalb = 0.0;
+
+    double febtotalb = 0.0;
+    double martotalb = 0.0;
+    double aprtotalb = 0.0;
+    double maytotalb = 0.0;
+    double juntotalb = 0.0;
+    double jultotalb = 0.0;
+    double augtotalb = 0.0;
+    double septotalb = 0.0;
+    double octtotalb = 0.0;
+    double novtotalb = 0.0;
+    double dectotalb = 0.0;
 
     // variable for our bar chart
     BarChart barChart;
@@ -67,6 +75,12 @@ public class stats extends AppCompatActivity {
 
     // array list for storing entries.
     ArrayList barEntriesArrayList;
+    ArrayList<String> monthArrayList = new ArrayList<>();
+    ArrayList<String> yAxis = new ArrayList<>();
+
+    AlertDialog alertDialog;
+    DBHandler db;
+    int year;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +89,12 @@ public class stats extends AppCompatActivity {
         tv = findViewById(R.id.textView);
         yearspinner = findViewById(R.id.year);
         setspinner();
+
+
+        db = new DBHandler(this);
+
+
+        year = Calendar.getInstance().get(Calendar.YEAR);
 
 
         // initializing variable for bar chart.
@@ -93,9 +113,10 @@ public class stats extends AppCompatActivity {
     private void setBar() {
         // calling method to get bar entries.
         getBarEntries();
+        getMonth();
 
         // creating a new bar data set.
-        barDataSet = new BarDataSet(barEntriesArrayList, "");
+        barDataSet = new BarDataSet(barEntriesArrayList, "Graph for yearly expenses");
 
         // creating a new bar data and
         // passing our bar data set.
@@ -113,8 +134,44 @@ public class stats extends AppCompatActivity {
         barDataSet.setValueTextColor(Color.BLACK);
 
         // setting text size
-        barDataSet.setValueTextSize(16f);
+        barDataSet.setValueTextSize(0f);
         barChart.getDescription().setEnabled(false);
+
+        barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(monthArrayList));
+        barChart.getAxisRight().setValueFormatter(new IndexAxisValueFormatter(yAxis));
+        barChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        barChart.getXAxis().setDrawGridLines(false);
+        barChart.getXAxis().setDrawAxisLine(false);
+        barChart.getXAxis().setLabelCount(12);
+        //barChart.getXAxis().setLabelRotationAngle(-45);
+        barChart.animateY(2000);
+        barChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+
+                int x = barChart.getBarData().getDataSetForEntry(e).getEntryIndex((BarEntry) e);
+                int y = x + 1;
+                String month = monthArrayList.get(y);
+                String amount1 = String.valueOf(barEntriesArrayList.get(x));
+                int strlen = amount1.length();
+                String amount = "Expenses are" + amount1.substring(16, strlen) + "₹";
+                AlertDialog.Builder builder = new AlertDialog.Builder(stats.this);
+                builder.setCancelable(true);
+                View nview = LayoutInflater.from(stats.this).inflate(R.layout.monthly_stats, null);
+                TextView month_txt = nview.findViewById(R.id.month);
+                TextView expense_txt = nview.findViewById(R.id.expense);
+                month_txt.setText(month);
+                expense_txt.setText(amount);
+                builder.setView(nview);
+                alertDialog = builder.create();
+                alertDialog.show();
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
     }
 
 
@@ -123,7 +180,7 @@ public class stats extends AppCompatActivity {
 
         int year = Calendar.getInstance().get(Calendar.YEAR);
         yeararraylist.add(year + "");
-        yeararraylist.add(year - 1 + "");
+
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, yeararraylist);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -161,18 +218,6 @@ public class stats extends AppCompatActivity {
         double novtotal = 0.0;
         double dectotal = 0.0;
 
-        jantotalb = 0.0;
-        febtotalb = 0.0;
-        martotalb = 0.0;
-        aprtotalb = 0.0;
-        maytotalb = 0.0;
-        juntotalb = 0.0;
-        jultotalb = 0.0;
-        augtotalb = 0.0;
-        septotalb = 0.0;
-        octtotalb = 0.0;
-        novtotalb = 0.0;
-        dectotalb = 0.0;
         ContentResolver cr = context.getContentResolver();
         Cursor c = cr.query(Telephony.Sms.CONTENT_URI, null, null, null, null);
         int totalSMS = 0;
@@ -211,49 +256,52 @@ public class stats extends AppCompatActivity {
                                         if (bodylowercase.contains("debited") || bodylowercase.contains("paid") || bodylowercase.contains("spent")) {
                                             amts = getamts(bodylowercase, "debited");
                                             if (amts.length() > 0) {
-                                                if (amts.charAt(0) == '.') {
-                                                    String am[] = amts.split(".", 2);
-                                                    amts = am[1];
-                                                }
+                                                try {
+                                                    if (amts.charAt(0) == '.') {
+                                                        String am[] = amts.split(".", 2);
+                                                        amts = am[1];
+                                                    }
+                                                    if (splitedate[1].trim().equalsIgnoreCase("jan")) {
+                                                        jantotal = jantotal + Double.parseDouble(amts);
+                                                        jantotalb = jantotal;
+                                                    } else if (splitedate[1].trim().equalsIgnoreCase("feb")) {
+                                                        febtotal = febtotal + Double.parseDouble(amts);
+                                                        febtotalb = febtotal;
+                                                    } else if (splitedate[1].trim().equalsIgnoreCase("mar")) {
+                                                        martotal = martotal + Double.parseDouble(amts);
+                                                        martotalb = martotal;
+                                                    } else if (splitedate[1].trim().equalsIgnoreCase("apr")) {
+                                                        aprtotal = aprtotal + Double.parseDouble(amts);
+                                                        aprtotalb = aprtotal;
+                                                    } else if (splitedate[1].trim().equalsIgnoreCase("may")) {
+                                                        maytotal = maytotal + Double.parseDouble(amts);
+                                                        maytotalb = maytotal;
+                                                    } else if (splitedate[1].trim().equalsIgnoreCase("jun")) {
+                                                        juntotal = juntotal + Double.parseDouble(amts);
+                                                        juntotalb = juntotal;
+                                                    } else if (splitedate[1].trim().equalsIgnoreCase("jul")) {
+                                                        jultotal = jultotal + Double.parseDouble(amts);
+                                                        jultotalb = jultotal;
+                                                    } else if (splitedate[1].trim().equalsIgnoreCase("aug")) {
+                                                        augtotal = augtotal + Double.parseDouble(amts);
+                                                        augtotalb = augtotal;
+                                                    } else if (splitedate[1].trim().equalsIgnoreCase("sep")) {
+                                                        septotal = septotal + Double.parseDouble(amts);
+                                                        septotalb = septotal;
+                                                    } else if (splitedate[1].trim().equalsIgnoreCase("oct")) {
+                                                        octtotal = octtotal + Double.parseDouble(amts);
+                                                        octtotalb = octtotal;
+                                                    } else if (splitedate[1].trim().equalsIgnoreCase("nov")) {
+                                                        novtotal = novtotal + Double.parseDouble(amts);
+                                                        novtotalb = novtotal;
+                                                    } else if (splitedate[1].trim().equalsIgnoreCase("dec")) {
+                                                        dectotal = dectotal + Double.parseDouble(amts);
+                                                        dectotalb = dectotal;
+                                                    }
+                                                    //    totaldeb = totaldeb + Double.parseDouble(amts);
+                                                } catch (Exception e) {
 
-                                                if (splitedate[1].trim().equalsIgnoreCase("jan")) {
-                                                    jantotal = jantotal + Double.parseDouble(amts);
-                                                    jantotalb = jantotal;
-                                                } else if (splitedate[1].trim().equalsIgnoreCase("feb")) {
-                                                    febtotal = febtotal + Double.parseDouble(amts);
-                                                    febtotalb = febtotal;
-                                                } else if (splitedate[1].trim().equalsIgnoreCase("mar")) {
-                                                    martotal = martotal + Double.parseDouble(amts);
-                                                    martotalb = martotal;
-                                                } else if (splitedate[1].trim().equalsIgnoreCase("apr")) {
-                                                    aprtotal = aprtotal + Double.parseDouble(amts);
-                                                    aprtotalb = aprtotal;
-                                                } else if (splitedate[1].trim().equalsIgnoreCase("may")) {
-                                                    maytotal = maytotal + Double.parseDouble(amts);
-                                                    maytotalb = maytotal;
-                                                } else if (splitedate[1].trim().equalsIgnoreCase("jun")) {
-                                                    juntotal = juntotal + Double.parseDouble(amts);
-                                                    juntotalb = juntotal;
-                                                } else if (splitedate[1].trim().equalsIgnoreCase("jul")) {
-                                                    jultotal = jultotal + Double.parseDouble(amts);
-                                                    jultotalb = jultotal;
-                                                } else if (splitedate[1].trim().equalsIgnoreCase("aug")) {
-                                                    augtotal = augtotal + Double.parseDouble(amts);
-                                                    augtotalb = augtotal;
-                                                } else if (splitedate[1].trim().equalsIgnoreCase("sep")) {
-                                                    septotal = septotal + Double.parseDouble(amts);
-                                                    septotalb = septotal;
-                                                } else if (splitedate[1].trim().equalsIgnoreCase("oct")) {
-                                                    octtotal = octtotal + Double.parseDouble(amts);
-                                                    octtotalb = octtotal;
-                                                } else if (splitedate[1].trim().equalsIgnoreCase("nov")) {
-                                                    novtotal = novtotal + Double.parseDouble(amts);
-                                                    novtotalb = novtotal;
-                                                } else if (splitedate[1].trim().equalsIgnoreCase("dec")) {
-                                                    dectotal = dectotal + Double.parseDouble(amts);
-                                                    dectotalb = dectotal;
                                                 }
-                                                //    totaldeb = totaldeb + Double.parseDouble(amts);
                                             }
                                         }
                                     }
@@ -278,6 +326,18 @@ public class stats extends AppCompatActivity {
             c.close();
             // tv.setText(jantotal+"\n"+febtotal+"\n"+martotal+"\n"+aprtotal+"\n"+maytotal+"\n"+juntotal+"\n"+jultotal+"\n"+augtotal+"\n"+septotal+"\n"+octtotal+"\n"+novtotal+"\n"+dectotal);
 
+            jantotalb = jantotal + db.gettotalofmonth("1", year + "");
+            febtotalb = febtotal + db.gettotalofmonth("2", year + "");
+            martotalb = martotal + db.gettotalofmonth("3", year + "");
+            aprtotalb = aprtotal + db.gettotalofmonth("4", year + "");
+            maytotalb = maytotal + db.gettotalofmonth("5", year + "");
+            juntotalb = juntotal + db.gettotalofmonth("6", year + "");
+            jultotalb = jultotal + db.gettotalofmonth("7", year + "");
+            augtotalb = augtotal + db.gettotalofmonth("8", year + "");
+            septotalb = septotal + db.gettotalofmonth("9", year + "");
+            octtotalb = octtotal + db.gettotalofmonth("10", year + "");
+            novtotalb = novtotal + db.gettotalofmonth("11", year + "");
+            dectotalb = dectotal+ db.gettotalofmonth("12", year + "");
 
         } else {
             Toast.makeText(this, "No message to show!", Toast.LENGTH_SHORT).show();
@@ -328,5 +388,31 @@ public class stats extends AppCompatActivity {
         barEntriesArrayList.add(new BarEntry(10f, (float) octtotalb));
         barEntriesArrayList.add(new BarEntry(11f, (float) novtotalb));
         barEntriesArrayList.add(new BarEntry(12f, (float) dectotalb));
+    }
+
+    private ArrayList<String> getMonth() {
+        monthArrayList.add("");
+        monthArrayList.add("JAN");
+        monthArrayList.add("FEB");
+        monthArrayList.add("MAR");
+        monthArrayList.add("APR");
+        monthArrayList.add("MAY");
+        monthArrayList.add("JUN");
+        monthArrayList.add("JUL");
+        monthArrayList.add("AUG");
+        monthArrayList.add("SEP");
+        monthArrayList.add("OCT");
+        monthArrayList.add("NOV");
+        monthArrayList.add("DEC");
+        return monthArrayList;
+    }
+
+    private ArrayList<String> getYAxisValues() {
+        yAxis.add("");
+        yAxis.add("");
+        yAxis.add("");
+        yAxis.add("");
+        yAxis.add("");
+        return yAxis;
     }
 }

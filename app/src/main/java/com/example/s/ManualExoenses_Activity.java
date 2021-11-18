@@ -25,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.textclassifier.ConversationActions;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -43,6 +44,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ManualExoenses_Activity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     RecyclerView rcv;
@@ -69,6 +72,7 @@ public class ManualExoenses_Activity extends AppCompatActivity implements Naviga
     private ArrayList<CourseModal> courseModalArrayList;
     private DBHandler dbHandler;
 
+    double totalcred=0;double totaldeb=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,24 +80,40 @@ public class ManualExoenses_Activity extends AppCompatActivity implements Naviga
         rcv = findViewById(R.id.rcv);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        month = findViewById(R.id.month);
 
         Message1=new ArrayList<>();
         dbHandler = new DBHandler(ManualExoenses_Activity.this);
-        a= dbHandler.read();
-        for(int i=0;i<a.size();i++)
-              Message1.add(a.get(i).getTitle()+a.get(i).getAmout()+a.get(i).getTransactionType()+a.get(i).getCategory()+a.get(i).getDay()+a.get(i).getMonth());
 
-        Messageadapter = new manual_expense_adapter(ManualExoenses_Activity.this,Message1);
+        setmonthspinner();
+        String mon_year=month.getSelectedItem().toString();
+        String split_mon_year[]=mon_year.split(" ");
+        int monthno=getMonthnumber(split_mon_year[0]);
+        Toast.makeText(this, ""+monthno, Toast.LENGTH_SHORT).show();
+        a=new ArrayList<>();
+        a= dbHandler.read(monthno+"",split_mon_year[1]);
+
+        Messageadapter = new manual_expense_adapter(ManualExoenses_Activity.this,a);
         rcv.setAdapter(Messageadapter);
         database=new DBHandler(ManualExoenses_Activity.this);
         layoutManager=new LinearLayoutManager(ManualExoenses_Activity.this);
         rcv.setLayoutManager(layoutManager);
 
-
         add = findViewById(R.id.add);
-
         totalcredtv = findViewById(R.id.total_cred);
         totaldebtv = findViewById(R.id.total_deb);
+
+
+        for(int i=0;i<a.size();i++){
+            if(a.get(i).getTransactionType().trim().equals("Expense")){
+                totaldeb= totaldeb+Double.parseDouble(a.get(i).getAmout());
+            }
+            else{
+                totalcred= totalcred+Double.parseDouble(a.get(i).getAmout());
+            }
+        }
+        totalcredtv.setText(totalcred+"");
+        totaldebtv.setText(totaldeb+"");
 
         drawerLayout = findViewById(R.id.drawer_layout);
         final ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_navigationbar, R.string.close_navigationbar);
@@ -103,8 +123,8 @@ public class ManualExoenses_Activity extends AppCompatActivity implements Naviga
         navigationView = findViewById(R.id.navi_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        month = findViewById(R.id.month);
-        setmonthspinner();
+
+
         setbottomnav();
         add.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -181,9 +201,26 @@ public class ManualExoenses_Activity extends AppCompatActivity implements Naviga
                             String amount1=amount.getText().toString();
 
                             CourseModal courseModal=new CourseModal(title1,amount1,splitdate[0],splitdate[1],splitdate[2],transtype1,category1);
-                            dbHandler.insert(ManualExoenses_Activity.this,courseModal);
+                            int id=dbHandler.insert(ManualExoenses_Activity.this,courseModal);
                             //Toast.makeText(ManualExoenses_Activity.this, ""+title1+amount1+splitdate[0]+splitdate[1]+splitdate[2]+category1+transtype1, Toast.LENGTH_SHORT).show();
-                            getdetails();
+
+                            courseModal.setId(id);
+
+                            String mon_year[]=month.getSelectedItem().toString().trim().split(" ",2);
+                            int mon=getMonthnumber(mon_year[0]);
+                            if((mon+"").equals(splitdate[1])&&mon_year[1].trim().equals(splitdate[2])){
+                                a.add(courseModal);
+                                Messageadapter.notifyDataSetChanged();
+                                if(transtype1.equals("Expense")){
+                                    totaldeb= totaldeb+Double.parseDouble(amount1);
+                                    totaldebtv.setText(totaldeb+"");
+                                }
+                                else{
+                                    totalcred= totalcred+Double.parseDouble(amount1);
+                                    totalcredtv.setText(totalcred+"");
+                                }
+                            }
+
                             d.dismiss();
 
                         }
@@ -199,13 +236,24 @@ public class ManualExoenses_Activity extends AppCompatActivity implements Naviga
 
     }
 
-    private void getdetails() {
-        Message1=new ArrayList<>();
-        a= dbHandler.read();
-        for(int i=0;i<a.size();i++)
-            Message1.add(a.get(i).getTitle()+a.get(i).getAmout()+a.get(i).getTransactionType()+a.get(i).getCategory()+a.get(i).getDay()+a.get(i).getMonth());
-        Messageadapter.notifyDataSetChanged();
+    private int getMonthnumber(String s) {
+        Map<String,String> map=new HashMap<>();
+        map.put("Jan","1");
+        map.put("Feb","2");
+        map.put("Mar","3");
+        map.put("Apr","4");
+        map.put("May","5");
+        map.put("Jun","6");
+        map.put("Jul","7");
+        map.put("Aug","8");
+        map.put("Sep","9");
+        map.put("Oct","10");
+        map.put("Nov","11");
+        map.put("Dec","12");
+        return Integer.parseInt(map.get(s));
+
     }
+
 
     private void setbottomnav() {
         BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
@@ -246,8 +294,25 @@ public class ManualExoenses_Activity extends AppCompatActivity implements Naviga
         month.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String monthname = parent.getItemAtPosition(position).toString();
-                Toast.makeText(parent.getContext(), "Selected: " + monthname, Toast.LENGTH_LONG).show();
+                String mon_year=month.getSelectedItem().toString();
+                String split_mon_year[]=mon_year.split(" ");
+                int monthno=getMonthnumber(split_mon_year[0]);
+                //Toast.makeText(ManualExoenses_Activity.this, ""+monthno, Toast.LENGTH_SHORT).show();
+                a.clear();
+                a.addAll(dbHandler.read(monthno+"",split_mon_year[1]));
+                totalcred=0;
+                totaldeb=0;
+                for(int i=0;i<a.size();i++){
+                    if(a.get(i).getTransactionType().trim().equals("Expense")){
+                        totaldeb= totaldeb+Double.parseDouble(a.get(i).getAmout());
+                    }
+                    else{
+                        totalcred= totalcred+Double.parseDouble(a.get(i).getAmout());
+                    }
+                }
+                totalcredtv.setText(totalcred+"");
+                totaldebtv.setText(totaldeb+"");
+                Messageadapter.notifyDataSetChanged();
             }
 
             @Override
@@ -276,26 +341,30 @@ public class ManualExoenses_Activity extends AppCompatActivity implements Naviga
         if (item.getItemId() == R.id.logout) {
             Toast.makeText(this, "logout", Toast.LENGTH_SHORT).show();
         }
-        if (item.getItemId() == R.id.trip) {
+        else if (item.getItemId() == R.id.trip) {
             Toast.makeText(this, "trip", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, SplitScreen.class));
         }
-        if (item.getItemId() == R.id.chart) {
+        else if (item.getItemId() == R.id.chart) {
             Toast.makeText(this, "stats", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, stats.class));
 
         }
-        if (item.getItemId() == R.id.privacy) {
+        else if (item.getItemId() == R.id.privacy) {
             Toast.makeText(this, "privacy", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, Privacy_Policy.class));
         }
-        if (item.getItemId() == R.id.connect_us) {
+        else if (item.getItemId() == R.id.connect_us) {
             Toast.makeText(this, "connect us", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Intent.ACTION_SENDTO)
                     .setData(new Uri.Builder().scheme("mailto").build())
                     .putExtra(Intent.EXTRA_EMAIL, new String[]{"ritvikdubeyrk@gmail.com"});
             startActivity(intent);
 
+        }
+        else if (item.getItemId() == R.id.prediction) {
+            Toast.makeText(this, "privacy", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, FutureActivity.class));
         }
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
@@ -311,4 +380,25 @@ public class ManualExoenses_Activity extends AppCompatActivity implements Naviga
     }
 
 
+    public void delete() {
+        String mon_year=month.getSelectedItem().toString();
+        String split_mon_year[]=mon_year.split(" ");
+        int monthno=getMonthnumber(split_mon_year[0]);
+        a.clear();
+        a.addAll(dbHandler.read(monthno+"",split_mon_year[1]));
+        totalcred=0;
+        totaldeb=0;
+        for(int i=0;i<a.size();i++){
+            if(a.get(i).getTransactionType().trim().equals("Expense")){
+                totaldeb= totaldeb+Double.parseDouble(a.get(i).getAmout());
+            }
+            else{
+                totalcred= totalcred+Double.parseDouble(a.get(i).getAmout());
+            }
+        }
+        totalcredtv.setText(totalcred+"");
+        totaldebtv.setText(totaldeb+"");
+        Messageadapter.notifyDataSetChanged();
+
+    }
 }

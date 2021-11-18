@@ -11,6 +11,11 @@
         android:title="Stats"/>
 
     <item
+        android:id="@+id/prediction"
+        android:icon="@drawable/ic_baseline_show_chart_24"
+        android:title="Prediction of Expenses"/>
+
+    <item
         android:id="@+id/connect_us"
         android:icon="@drawable/ic_baseline_email_24"
         android:title="Contact Us"/>
