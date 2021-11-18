@@ -204,20 +204,21 @@ public class ManualExoenses_Activity extends AppCompatActivity implements Naviga
                             int id=dbHandler.insert(ManualExoenses_Activity.this,courseModal);
                             //Toast.makeText(ManualExoenses_Activity.this, ""+title1+amount1+splitdate[0]+splitdate[1]+splitdate[2]+category1+transtype1, Toast.LENGTH_SHORT).show();
 
-                            courseModal.setId(id);
+                            if(id>0) {
+                                courseModal.setId(id);
 
-                            String mon_year[]=month.getSelectedItem().toString().trim().split(" ",2);
-                            int mon=getMonthnumber(mon_year[0]);
-                            if((mon+"").equals(splitdate[1])&&mon_year[1].trim().equals(splitdate[2])){
-                                a.add(courseModal);
-                                Messageadapter.notifyDataSetChanged();
-                                if(transtype1.equals("Expense")){
-                                    totaldeb= totaldeb+Double.parseDouble(amount1);
-                                    totaldebtv.setText(totaldeb+"");
-                                }
-                                else{
-                                    totalcred= totalcred+Double.parseDouble(amount1);
-                                    totalcredtv.setText(totalcred+"");
+                                String mon_year[] = month.getSelectedItem().toString().trim().split(" ", 2);
+                                int mon = getMonthnumber(mon_year[0]);
+                                if ((mon + "").equals(splitdate[1]) && mon_year[1].trim().equals(splitdate[2])) {
+                                    a.add(courseModal);
+                                    Messageadapter.notifyDataSetChanged();
+                                    if (transtype1.equals("Expense")) {
+                                        totaldeb = totaldeb + Double.parseDouble(amount1);
+                                        totaldebtv.setText(totaldeb + "");
+                                    } else {
+                                        totalcred = totalcred + Double.parseDouble(amount1);
+                                        totalcredtv.setText(totalcred + "");
+                                    }
                                 }
                             }
 
